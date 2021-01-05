@@ -1,50 +1,29 @@
-# code-with-quarkus project
+# Code example for GraphQL issue with smallrye-graphql client
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Example generates GraphQL Client from schema and queries it. (HSL Routing API)
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+The test can be run using `./mvnw verify`
 
-## Running the application in dev mode
-
-You can run your application in dev mode that enables live coding using:
-```shell script
-./mvnw compile quarkus:dev
+The client sends the following request:
+```
+curl \
+-X POST \
+-H "Content-Type: application/json" \
+--data '{ "query": "query pattern($id: String) { pattern(id: $id) {name} }", "variables": {"id":"HSL:1059:0:01"}, "operationName": "pattern" }' \
+https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql
+```
+This returns an error:
+```
+{"errors":[{"validationErrorType":"VariableTypeMismatch","errorType":"ValidationError","locations":[{"line":1,"column":42}],"message":"Validation error of type VariableTypeMismatch: Variable type doesn't match"}]}
 ```
 
-## Packaging and running the application
-
-The application can be packaged using:
-```shell script
-./mvnw package
+Following request returns expected response:
 ```
-It produces the `code-with-quarkus-1.0.0-SNAPSHOT-runner.jar` file in the `/target` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/lib` directory.
+curl \
+-X POST \
+-H "Content-Type: application/json" \
+--data '{ "query": "query pattern($id: String!) { pattern(id: $id) {name} }", "variables": {"id":"HSL:1059:0:01"}, "operationName": "pattern" }' \
+https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql
 
-If you want to build an _über-jar_, execute the following command:
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
+{"data":{"pattern":{"name":"59 to Pajamäki (HSL:1461109)"}}}
 ```
-
-The application is now runnable using `java -jar target/code-with-quarkus-1.0.0-SNAPSHOT-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using: 
-```shell script
-./mvnw package -Pnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
-```shell script
-./mvnw package -Pnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/code-with-quarkus-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html.
-
-# RESTEasy JAX-RS
-
-<p>A Hello World RESTEasy resource</p>
-
-Guide: https://quarkus.io/guides/rest-json
